@@ -1,0 +1,26 @@
+# Kubernetes / kubeconfig files
+*.kubeconfig
+kubeconfig*
+config.secret
+
+# Local Environment Variables and Secrets
+.env
+.env.*
+*.pem
+*.key
+*.cert
+*.tfvars
+
+# Helm Artifacts
+*.tgz
+/charts/
+
+# Logs and temp files
+*.log
+*.tmp
+tmp/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+Desktop.ini

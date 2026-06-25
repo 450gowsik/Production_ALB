@@ -1,0 +1,72 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alb-ingress
+  namespace: default
+  annotations:
+    # Ingress Class
+    kubernetes.io/ingress.class: alb
+    
+    # ALB Configuration
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    
+    # SSL Configuration (ACM)
+    # REPLACE <ACM_CERTIFICATE_ARN> with your actual certificate ARN from AWS ACM
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:123456789012:certificate/example-arn-1234-5678
+    
+    # Listen Ports (HTTP 80 and HTTPS 443)
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    
+    # Automatic SSL Redirect (HTTP -> HTTPS)
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    
+    # Health Check Configuration
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '3'
+spec:
+  ingressClassName: alb
+  rules:
+    # 1. Host-based Routing for Web Application
+    - host: app.company.com
+      http:
+        paths:
+          # Base path host routing
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-app-service
+                port:
+                  number: 80
+          # Path-based Routing under app.company.com: /app
+          - path: /app
+            pathType: Prefix
+            backend:
+              service:
+                name: web-app-service
+                port:
+                  number: 80
+          # Path-based Routing under app.company.com: /api
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-app-service
+                port:
+                  number: 80
+
+    # 2. Host-based Routing for Mock API
+    - host: api.company.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-app-service
+                port:
+                  number: 80
